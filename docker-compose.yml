@@ -1,8 +1,10 @@
-version: '3.8'
+version: '3.9'
 
 services:
   pocamarket_api:
-    build: ./pocamarket_api
+    build:
+      context: ./pocamarket_api
+    container_name: pocamarket_api
     ports:
       - "8080:8080"
     volumes:
@@ -11,15 +13,15 @@ services:
       - pocamarket_network
 
   pocamarket_web:
-    build: ./pocamarket_web
+    build:
+      context: ./pocamarket_web
+    container_name: pocamarket_web
     ports:
       - "3000:3000"
     volumes:
       - ./pocamarket_web:/src
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:8080
-    depends_on:
-      - pocamarket_api
+      - NEXT_PUBLIC_API_URL=http://pocamarket_api:8080
     networks:
       - pocamarket_network
 
