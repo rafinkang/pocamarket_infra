@@ -13,15 +13,16 @@ services:
       - pocamarket_network
 
   pocamarket_web:
-    build: ./pocamarket_web
+    build: 
+      context: ./pocamarket_web
+      dockerfile: Dockerfile
     ports:
       - "3000:3000"
     volumes:
-      - ./pocamarket_web:/src
+      - ./pocamarket_web/:/src
       - /src/node_modules
-    environment:
-      - NEXT_PUBLIC_API_URL=http://pocamarket_api:8080
-      - CHOKIDAR_USEPOLLING=true
+    env_file:
+      - ./pocamarket_web/.env
     depends_on:
       - pocamarket_api
     networks:
