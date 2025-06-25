@@ -1,32 +1,45 @@
 version: '3.9'
 
 services:
+  nginx:
+    image: nginx:alpine
+    container_name: pocamarket_nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./certbot/www:/var/www/certbot
+    depends_on:
+      - pocamarket_web
+      - pocamarket_api
+    networks:
+      - pocamarket_network
+    restart: unless-stopped
+
   pocamarket_api:
     build:
       context: ./pocamarket_api
     container_name: pocamarket_api
-    ports:
-      - "8080:8080"
-    volumes:
-      - ./pocamarket_api:/src
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - JAVA_OPTS=-Xmx512m -Xms256m
     networks:
       - pocamarket_network
+    restart: unless-stopped
 
   pocamarket_web:
-    build: 
+    build:
       context: ./pocamarket_web
-      dockerfile: Dockerfile
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./pocamarket_web/:/src
-      - /src/node_modules
-    env_file:
-      - ./pocamarket_web/.env
-    depends_on:
-      - pocamarket_api
+    container_name: pocamarket_web
+    environment:
+      - NODE_ENV=production
     networks:
       - pocamarket_network
+    restart: unless-stopped
+
+volumes:
+  app_logs:
 
 networks:
   pocamarket_network:
