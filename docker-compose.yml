@@ -11,40 +11,40 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./certbot/www:/var/www/certbot
     depends_on:
-      - pocamarket_web
-      - pocamarket_api
+      - pocamarket-web
+      - pocamarket-api
     networks:
-      - pocamarket_network
+      - pocamarket-network
     restart: unless-stopped
 
-  pocamarket_api:
+  pocamarket-api:
+    container_name: pocamarket-api
     env_file:
       - ./pocamarket_api/.env
     build:
       context: ./pocamarket_api
-    container_name: pocamarket_api
     environment:
       - SPRING_PROFILES_ACTIVE=prod
       - JAVA_OPTS=-Xmx512m -Xms256m
     networks:
-      - pocamarket_network
+      - pocamarket-network
     restart: unless-stopped
 
-  pocamarket_web:
+  pocamarket-web:
+    container_name: pocamarket-web
     env_file:
       - ./pocamarket_web/.env
     build:
       context: ./pocamarket_web
-    container_name: pocamarket_web
     environment:
       - NODE_ENV=production
     networks:
-      - pocamarket_network
+      - pocamarket-network
     restart: unless-stopped
 
 volumes:
   app_logs:
 
 networks:
-  pocamarket_network:
+  pocamarket-network:
     driver: bridge

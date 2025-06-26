@@ -16,7 +16,7 @@ services:
       - SPRING_PROFILES_ACTIVE=local
       - JAVA_OPTS=-Xmx512m -Xms256m
     networks:
-      - pocamarket_network
+      - pocamarket-network
     restart: unless-stopped
 
   pocamarket_web:
@@ -38,12 +38,12 @@ services:
     depends_on:
       - pocamarket-api
     networks:
-      - pocamarket_network
+      - pocamarket-network
     restart: unless-stopped
 
 volumes:
   app_logs:
 
 networks:
-  pocamarket_network:
+  pocamarket-network:
     driver: bridge
