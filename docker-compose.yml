@@ -31,6 +31,8 @@ services:
     restart: unless-stopped
 
   pocamarket_web:
+    env_file:
+      - ./pocamarket_web/.env
     build:
       context: ./pocamarket_web
     container_name: pocamarket_web
