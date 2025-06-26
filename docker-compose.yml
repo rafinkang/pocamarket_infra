@@ -18,6 +18,8 @@ services:
     restart: unless-stopped
 
   pocamarket_api:
+    env_file:
+      - ./pocamarket_api/.env
     build:
       context: ./pocamarket_api
     container_name: pocamarket_api
