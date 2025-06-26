@@ -1,15 +1,29 @@
 version: '3.9'
 
 services:
+  nginx:
+    image: nginx:alpine
+    container_name: pocamarket-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./certbot/www:/var/www/certbot
+    depends_on:
+      - pocamarket-web
+      - pocamarket-api
+    networks:
+      - pocamarket-network
+    restart: unless-stopped
+
   pocamarket-api:
+    container_name: pocamarket-api
     env_file:
       - ./pocamarket_api/.env
     build:
       context: ./pocamarket_api
       dockerfile: Dockerfile.dev
-    container_name: pocamarket-api
-    ports:
-      - "8080:8080"
     volumes:
       - ./pocamarket_api:/src
     environment:
@@ -24,16 +38,14 @@ services:
       context: ./pocamarket_web
       dockerfile: Dockerfile.dev
     container_name: pocamarket-web
-    ports:
-      - "3000:3000"
     volumes:
       - ./pocamarket_web:/src
       - /src/node_modules
     environment:
       - NODE_ENV=development
       - DOCKER_ENV=true
-      - NEXT_PUBLIC_LOCAL_API_URL=http://localhost:8080
-      - NEXT_PUBLIC_INTERNAL_API_URL=http://pocamarket-api:8080
+      # - NEXT_PUBLIC_LOCAL_API_URL=http://localhost:8080
+      # - NEXT_PUBLIC_INTERNAL_API_URL=http://pocamarket-api:8080
     env_file:
       - ./pocamarket_web/.env
     depends_on:
