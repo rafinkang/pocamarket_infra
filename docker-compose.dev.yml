@@ -1,35 +1,48 @@
 version: '3.9'
 
 services:
-  pocamarket_api:
+  pocamarket-api:
+    env_file:
+      - ./pocamarket_api/.env
     build:
       context: ./pocamarket_api
-      dockerfile: Dockerfile
-      target: dev
-    container_name: pocamarket_api
+      dockerfile: Dockerfile.dev
+    container_name: pocamarket-api
     ports:
       - "8080:8080"
     volumes:
       - ./pocamarket_api:/src
+    environment:
+      - SPRING_PROFILES_ACTIVE=local
+      - JAVA_OPTS=-Xmx512m -Xms256m
     networks:
       - pocamarket_network
+    restart: unless-stopped
 
   pocamarket_web:
     build:
       context: ./pocamarket_web
-      dockerfile: Dockerfile
-      target: dev
+      dockerfile: Dockerfile.dev
+    container_name: pocamarket_web
     ports:
       - "3000:3000"
     volumes:
-      - ./pocamarket_web/:/src
+      - ./pocamarket_web:/src
       - /src/node_modules
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_LOCAL_API_URL=http://localhost:8080
+      - NEXT_PUBLIC_INTERNAL_API_URL=http://pocamarket-api:8080
     env_file:
       - ./pocamarket_web/.env
     depends_on:
-      - pocamarket_api
+      - pocamarket-api
     networks:
       - pocamarket_network
+    restart: unless-stopped
+
+volumes:
+  app_logs:
 
 networks:
   pocamarket_network:
