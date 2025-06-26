@@ -19,11 +19,11 @@ services:
       - pocamarket-network
     restart: unless-stopped
 
-  pocamarket_web:
+  pocamarket-web:
     build:
       context: ./pocamarket_web
       dockerfile: Dockerfile.dev
-    container_name: pocamarket_web
+    container_name: pocamarket-web
     ports:
       - "3000:3000"
     volumes:
