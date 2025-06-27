@@ -1,0 +1,34 @@
+# 워크플로우 이름
+name: Deploy pocamarket-infra to EC2
+
+# 워크플로우 실행 조건: 'master' 브랜치에 푸시될 때
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.AWS_EC2_HOST }}
+          username: ${{ secrets.AWS_EC2_USERNAME }}
+          key: ${{ secrets.AWS_EC2_SSH_KEY }}
+          script: |
+            # EC2 서버에서 실행될 스크립트
+            cd /var/www/pocamarket # pocamarket 인프라 레포지토리 경로
+            git pull origin master # 최신 nginx 설정 및 docker-compose 파일 가져오기
+            
+            # 최신 이미지들 다운로드 (다른 레포지토리에서 빌드된 이미지들)
+            docker-compose pull pocamarket-web pocamarket-api
+            
+            # nginx 설정이 변경되었을 수 있으므로 전체 재시작
+            docker-compose down
+            docker-compose up -d
+            
+            # 사용하지 않는 이미지 정리
+            docker image prune -f

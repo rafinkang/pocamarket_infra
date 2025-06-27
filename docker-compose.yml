@@ -1,7 +1,7 @@
 services:
   nginx:
-    image: nginx:alpine
     container_name: pocamarket-infra
+    image: nginx:alpine
     ports:
       - "80:80"
       - "443:443"
@@ -17,10 +17,9 @@ services:
 
   pocamarket-api:
     container_name: pocamarket-api
+    image: rafin89/pocamarket-api:latest
     env_file:
       - ./pocamarket_api/.env
-    build:
-      context: ./pocamarket_api
     environment:
       - SPRING_PROFILES_ACTIVE=prod
       - JAVA_OPTS=-Xmx512m -Xms256m
@@ -30,10 +29,9 @@ services:
 
   pocamarket-web:
     container_name: pocamarket-web
+    image: rafin89/pocamarket-web:latest
     env_file:
       - ./pocamarket_web/.env
-    build:
-      context: ./pocamarket_web
     environment:
       - NODE_ENV=production
     networks:
