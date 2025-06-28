@@ -27,6 +27,9 @@ services:
       - JAVA_OPTS=-Xmx512m -Xms256m
     networks:
       - pocamarket-network
+    # command를 추가하여 Dockerfile의 CMD를 덮어씀
+    # sh -c 를 이용해 셸을 실행하고, $$JAVA_OPTS로 컨테이너 내부의 환경변수를 참조
+    command: sh -c "java $$JAVA_OPTS -jar app.jar"
     restart: unless-stopped
 
   pocamarket-web:
