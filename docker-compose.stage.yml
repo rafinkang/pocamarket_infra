@@ -6,9 +6,12 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./certbot/www:/var/www/certbot # Certbot 웹루트 검증 경로
-      - ./certbot/conf:/etc/letsencrypt # 인증서 파일들이 저장될 볼륨
+      - ./nginx/nginx.local.conf:/etc/nginx/nginx.conf
+      # - ./certbot/www:/var/www/certbot # Certbot 웹루트 검증 경로
+      # - ./certbot/conf:/etc/letsencrypt # 인증서 파일들이 저장될 볼륨
+      # ★★★ mkcert 인증서 파일들을 컨테이너 내부로 연결 ★★★
+      - ./localhost+1.pem:/etc/ssl/certs/localhost+1.pem
+      - ./localhost+1-key.pem:/etc/ssl/private/localhost+1-key.pem
     depends_on:
       - pocamarket-web
       - pocamarket-api
