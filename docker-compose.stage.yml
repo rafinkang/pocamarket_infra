@@ -12,6 +12,8 @@ services:
       # ★★★ mkcert 인증서 파일들을 컨테이너 내부로 연결 ★★★
       - ./localhost+1.pem:/etc/ssl/certs/localhost+1.pem
       - ./localhost+1-key.pem:/etc/ssl/private/localhost+1-key.pem
+    environment:
+      - TZ=Asia/Seoul
     depends_on:
       - pocamarket-web
       - pocamarket-api
