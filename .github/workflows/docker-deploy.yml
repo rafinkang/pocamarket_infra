@@ -28,5 +28,5 @@ jobs:
             docker-compose down
             docker-compose up -d
             
-            # 사용하지 않는 이미지 정리
-            docker image prune -af
+            # 모든 도커 이미지, 컨테이너, 네트워크, 빌드캐시 정리
+            docker system prune -af
