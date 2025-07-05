@@ -1,3 +1,6 @@
+# Docker Compose 프로덕션 환경 설정
+name: pocamarket
+
 services:
   nginx:
     container_name: nginx

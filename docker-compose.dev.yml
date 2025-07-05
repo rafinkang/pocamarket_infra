@@ -1,60 +1,86 @@
+name: pocamarket-dev
+
 services:
   nginx:
+    container_name: nginx-dev
     image: nginx:alpine
-    container_name: pocamarket-nginx
     ports:
       - "80:80"
       - "443:443"
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./certbot/www:/var/www/certbot
+      - ./nginx/nginx.local.conf:/etc/nginx/nginx.conf
+      # - ./certbot/www:/var/www/certbot # Certbot 웹루트 검증 경로
+      # - ./certbot/conf:/etc/letsencrypt # 인증서 파일들이 저장될 볼륨
+      # ★★★ mkcert 인증서 파일들을 컨테이너 내부로 연결 ★★★
+      - ./localhost+1.pem:/etc/ssl/certs/localhost+1.pem
+      - ./localhost+1-key.pem:/etc/ssl/private/localhost+1-key.pem
+    environment:
+      - TZ=Asia/Seoul
     depends_on:
       - pocamarket-web
       - pocamarket-api
+      - certbot # Nginx는 Certbot이 인증서를 발급받은 후에 시작될 수 있도록 의존성 설정 (certbot init 단계에서만 사용)
     networks:
-      - pocamarket-network
+      - pocamarket-network-dev
     restart: unless-stopped
+
+  certbot:
+    container_name: certbot-dev
+    image: certbot/certbot
+    volumes:
+      - ./certbot/www:/var/www/certbot # Nginx와 동일한 볼륨 마운트
+      - ./certbot/conf:/etc/letsencrypt # Nginx와 동일한 볼륨 마운트
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $!; done;'" # 자동 갱신 스케줄러
+    networks:
+      - pocamarket-network-dev
 
   pocamarket-api:
-    container_name: pocamarket-api
+    image: openjdk:17-alpine
+    container_name: pocamarket-api-dev
+    # build:
+    #   context: ./pocamarket_api
+    #   dockerfile: Dockerfile.dev
     env_file:
       - ./pocamarket_api/.env
-    build:
-      context: ./pocamarket_api
-      dockerfile: Dockerfile.dev
     volumes:
       - ./pocamarket_api:/src
+    # 컨테이너의 기본 작업 디렉토리 설정
+    working_dir: /src
     environment:
+      - SPRING_DEVTOOLS_RESTART_ENABLED=true
+      - SPRING_DEVTOOLS_LIVERELOAD_ENABLED=true
       - SPRING_PROFILES_ACTIVE=local
-      - JAVA_OPTS=-Xmx512m -Xms256m
+    ports:
+      - "8080:8080"  # API 직접 접속용 포트
     networks:
-      - pocamarket-network
+      - pocamarket-network-dev
     restart: unless-stopped
+    # 컨테이너 시작 시 실행할 명령어
+    # 여기서도 bootRun을 사용하지만, 최초 한 번만 빌드하고 이후에는 DevTools가 재시작을 담당합니다.
+    command: ["./gradlew", "bootRun", "--no-daemon"]
 
   pocamarket-web:
+    container_name: pocamarket-web-dev
     build:
       context: ./pocamarket_web
       dockerfile: Dockerfile.dev
-    container_name: pocamarket-web
     volumes:
       - ./pocamarket_web:/src
       - /src/node_modules
-    environment:
-      - NODE_ENV=development
-      - DOCKER_ENV=true
-      # - NEXT_PUBLIC_LOCAL_API_URL=http://localhost:8080
-      # - NEXT_PUBLIC_INTERNAL_API_URL=http://pocamarket-api:8080
     env_file:
       - ./pocamarket_web/.env
-    depends_on:
-      - pocamarket-api
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://pocamarket-api-dev:8080
+      - WATCHPACK_POLLING=true
+      - CHOKIDAR_USEPOLLING=true
+      - FAST_REFRESH=true
+    ports:
+      - "3000:3000"  # HMR 직접 접속용 포트
     networks:
-      - pocamarket-network
+      - pocamarket-network-dev
     restart: unless-stopped
 
-volumes:
-  app_logs:
-
 networks:
-  pocamarket-network:
+  pocamarket-network-dev:
     driver: bridge
